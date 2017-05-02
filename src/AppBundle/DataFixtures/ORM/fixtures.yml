@@ -1,0 +1,13 @@
+AppBundle\Entity\Category:
+  category_{1..10}:
+    name: <name()>
+    iconKey: <name()>
+
+
+AppBundle\Entity\FortuneCookie:
+  fortuneCookie_{1..10}:
+    category: '@category_*'
+    fortune: <sentence()>
+    createdAt: <dateTimeBetween("-200 days", "now")>
+    numberPrinted: <numberBetween(1, 10)>
+    discontinued: <numberBetween(1, 10)>
