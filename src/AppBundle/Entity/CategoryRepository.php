@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 
 /**
  * CategoryRepository
@@ -15,9 +16,10 @@ class CategoryRepository extends EntityRepository
     public function findAllOrdered()
     {
         $qb = $this->createQueryBuilder('cat')
-            ->leftJoin('cat.fortuneCookies', 'fc')
-            ->addSelect('fc')
             ->addOrderBy('cat.name', 'ASC');
+
+        $this->addFortuneCookieJoinAndSelect($qb);
+
         $query = $qb->getQuery();
 
         return $query->execute();
@@ -27,25 +29,37 @@ class CategoryRepository extends EntityRepository
     
     public function search($term)
     {
-        return $qb = $this->createQueryBuilder('cat')
+        $qb = $this->createQueryBuilder('cat')
             ->andWhere('cat.name LIKE :searchTerm 
                 OR cat.iconKey LIKE :searchTerm 
                 OR fc.fortune LIKE :searchTerm')
-            ->leftJoin('cat.fortuneCookies', 'fc')
-            ->addSelect('fc')
-            ->setParameter('searchTerm', '%'.$term.'%')
-            ->getQuery()
-            ->execute();
+            ->setParameter('searchTerm', '%'.$term.'%');
+
+        $this->addFortuneCookieJoinAndSelect($qb);
+
+        return $qb->getQuery()
+                  ->execute();
     }
     
     public function findWithFortunesJoin($id)
     {
-        return $qb = $this->createQueryBuilder('cat')
+        $qb = $this->createQueryBuilder('cat')
             ->andWhere('cat.id = :id')
-            ->leftJoin('cat.fortuneCookies', 'fc')
-            ->addSelect('fc')
-            ->setParameter('id', $id)
-            ->getQuery()
+            ->setParameter('id', $id);
+
+        $this->addFortuneCookieJoinAndSelect($qb);
+
+        return $qb->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * @param QueryBuilder $qb
+     * @return QueryBuilder
+     */
+    private function addFortuneCookieJoinAndSelect(QueryBuilder $qb)
+    {
+        return $qb->leftJoin('cat.fortuneCookies', 'fc')
+                  ->addSelect('fc');
     }
 }
