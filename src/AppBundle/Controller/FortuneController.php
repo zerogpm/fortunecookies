@@ -2,9 +2,9 @@
 
 namespace AppBundle\Controller;
 
+use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use AppBundle\Entity\Category;
 use Symfony\Component\HttpFoundation\Request;
 
 class FortuneController extends Controller
@@ -14,6 +14,14 @@ class FortuneController extends Controller
      */
     public function homepageAction(Request $request)
     {
+        /**
+         * @var EntityManager $em
+         */
+        $em = $this->getDoctrine()->getManager();
+        $filter =$em->getFilters()
+           ->enable('fortune_cookie_discontinued');
+        $filter->setParameter('discontinued', false);
+
         $categoryRepository = $this->getDoctrine()
             ->getManager()
             ->getRepository('AppBundle:Category');
